@@ -89,7 +89,7 @@ En tu terminal Bash:
 nano ~/.bashrc
 ```
 
-2. Pega la función completa (y, si usaste mis rutas, sustituye <YOURUSERNAME> por el tuyo):
+2. Pega la función completa (y, si usaste mis rutas, sustituye /<YOURUSERNAME/> por el tuyo):
 
 ```bash
 function aishell2() {
