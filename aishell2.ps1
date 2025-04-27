@@ -151,6 +151,8 @@ if ($simple -and ($e -or $full)) {
     exit
 }
 
+$errorContent = ""
+
 # Recoger historiales
 if ($simple) {
     $combinedHistory = "=== Modo simple activado: No se ha incluido historial de terminales ==="
@@ -158,35 +160,33 @@ if ($simple) {
     $psHistory = Get-RecentPSCommands
     $bashHistory = Get-RecentBashCommands
     $combinedHistory = "=== Historial de PowerShell ===`n$psHistory`n`n=== Historial de Bash ===`n$bashHistory"
-}
-
-# Recoger errores
-$errorContent = ""
-
-if ($e -and -not $simple) {
-    # Errores de PowerShell
-    if ($Error.Count -gt 0) {
-        $psErrors = ($Error[-5..-1] | ForEach-Object { $_.ToString() }) -join "`n"
-        $errorContent += "`n=== Errores recientes de PowerShell ===`n$psErrors"
-    }
-
-    # Errores en Bash/WSL
-    try {
-        $lastBashExitCode = (wsl bash -c "echo $?").Trim()
-        wsl bash -c "true" | Out-Null
-        $secondLastBashExitCode = (wsl bash -c "echo $?").Trim()
-
-        if ($lastBashExitCode -ne "0" -or $secondLastBashExitCode -ne "0") {
-            wsl bash -c "history -a" | Out-Null
-            $bashErrorHistoryRaw = wsl cat ~/.bash_history
-            $bashErrorHistory = $bashErrorHistoryRaw -split "`n"
-            $bashCommands = ($bashErrorHistory | Select-Object -Last 5) -join "`n"
-            $errorContent += "`n=== Comandos recientes en Bash tras errores ===`n$bashCommands"
+    # Recoger errores
+    if ($e -and -not $simple) {
+        # Errores de PowerShell
+        if ($Error.Count -gt 0) {
+            $psErrors = ($Error[-5..-1] | ForEach-Object { $_.ToString() }) -join "`n"
+            $errorContent += "`n=== Errores recientes de PowerShell ===`n$psErrors"
         }
-    } catch {
-        $errorContent += "`n(No se pudo determinar el estado de errores en Bash)"
+
+        # Errores en Bash/WSL
+        try {
+            $lastBashExitCode = (wsl bash -c "echo $?").Trim()
+            wsl bash -c "true" | Out-Null
+            $secondLastBashExitCode = (wsl bash -c "echo $?").Trim()
+
+            if ($lastBashExitCode -ne "0" -or $secondLastBashExitCode -ne "0") {
+                wsl bash -c "history -a" | Out-Null
+                $bashErrorHistoryRaw = wsl cat ~/.bash_history
+                $bashErrorHistory = $bashErrorHistoryRaw -split "`n"
+                $bashCommands = ($bashErrorHistory | Select-Object -Last 5) -join "`n"
+                $errorContent += "`n=== Comandos recientes en Bash tras errores ===`n$bashCommands"
+            }
+        } catch {
+            $errorContent += "`n(No se pudo determinar el estado de errores en Bash)"
+        }
     }
 }
+
 
 # Archivos/directorios
 $fileContent = ""
