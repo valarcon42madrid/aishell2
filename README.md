@@ -70,7 +70,7 @@ notepad $PROFILE
 2. Añade esta línea al final:
 
 ```powershell
-Set-Alias aishell2 "C:\Users\uno1v\grokAIshell\aishell2.ps1"
+Set-Alias aishell2 "C:\Users\<YOURUSERNAME>\grokAIshell\aishell2.ps1"
 ```
 
 ✅ Ahora podrás usar `aishell2` directamente en PowerShell7.
@@ -89,7 +89,7 @@ En tu terminal Bash:
 nano ~/.bashrc
 ```
 
-2. Pega la función completa:
+2. Pega la función completa (y, si usaste mis rutas, sustituye <YOURUSERNAME> por el tuyo):
 
 ```bash
 function aishell2() {
@@ -103,10 +103,10 @@ function aishell2() {
         drive_letter=$(echo "$bash_dir" | cut -d'/' -f3)
         path_rest=$(echo "$bash_dir" | cut -d'/' -f4-)
         windows_dir="${drive_letter^^}:\\"$(echo "$path_rest" | sed 's|/|\\|g')
-        pwsh.exe -NoLogo -WorkingDirectory "$windows_dir" -ExecutionPolicy Bypass -File C:\\Users\\uno1v\\grokAIshell\\aishell2.ps1 "$@"
+        pwsh.exe -NoLogo -WorkingDirectory "$windows_dir" -ExecutionPolicy Bypass -File C:\\Users\\<YOURUSERNAME>\\grokAIshell\\aishell2.ps1 "$@"
     else
         windows_dir="\\\\wsl$\\${distro_name}${bash_dir}"
-        pwsh.exe -NoLogo -WorkingDirectory "$windows_dir" -ExecutionPolicy Bypass -File C:\\Users\\uno1v\\grokAIshell\\aishell2.ps1 "$@"
+        pwsh.exe -NoLogo -WorkingDirectory "$windows_dir" -ExecutionPolicy Bypass -File C:\\Users\\<YOURUSERNAME>\\grokAIshell\\aishell2.ps1 "$@"
     fi
 }
 ```
