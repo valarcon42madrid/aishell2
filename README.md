@@ -17,7 +17,7 @@ Puede ayudarte a:
 
 | Modo | Descripción |
 |:--|:--|
-| `-f archivo1 archivo2` | Incluye uno o varios archivos en el contexto enviado. |
+| `-f archivo1,archivo2` | Incluye uno o varios archivos en el contexto enviado. |
 | `-d directorio` | Incluye todos los archivos especiales (.yml, .json, Dockerfile, etc.) de un directorio. |
 | `-e` | Añade errores recientes detectados en PowerShell o Bash/WSL. |
 | `-full` | Envía archivos completos, ignorando el límite de 500 líneas o 32 KB. |
