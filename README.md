@@ -95,6 +95,7 @@ nano ~/.bashrc
 function aishell2() {
     local bash_dir
     bash_dir=$(pwd)
+    history -a
 
     local distro_name
     distro_name=$(wsl.exe -l --quiet --running | grep '*' | sed 's/\*//g' | awk '{$1=$1};1')
