@@ -44,8 +44,7 @@ Las instrucciones de la IA están coloreadas según su contexto:
 
 Ejemplo:
 
-$> ip addr show        ← magenta (Bash)
-$> Get-NetIPAddress    ← cyan (PowerShell)
+
 
 ---
 
