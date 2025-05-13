@@ -160,18 +160,21 @@ También se pueden usar otros modelos no-gratuitos o ilimitados modificando en a
 
 ---
 
-## 2️⃣ Cambiar el alias `aishell2`
-
+## 2️⃣ Cambiar el alias `aishell2` y/o el nombre del archivo aishell2.ps1
+  
+   PARA EL ALIAS:
+  
 - En PowerShell7: cambia el alias en tu `$PROFILE`.
 - En Bash: cambia el nombre de la función `function aishell2()`.
 
+   PARA EL NOMBRE DEL ARCHIVO:
+   
+- Deberas modificar también tu ~/.bashrc y tu notepad $PROFILE para corregir con el nuevo path.
+  
 **Importante:**
-Si cambias el nombre del comando, también debes actualizarlo en `aishell2.ps1` (el `system` message) para que la IA siga sabiendo correctamente que está ayudándote desde el nuevo nombre.
-
-```powershell
-Eres un asistente de terminal llamado 'nuevo_nombre'.
 ```
-
+    SI CAMBIAS CUALQUIERA:
+* Revisa también `aishell2.ps1` para sustituir las alusiones del nombre de comando o de archivo, ya que ambos aparecen en casos explicativos para dar contexto.
 ---
 
 # 🏁 Final
