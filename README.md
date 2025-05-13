@@ -168,7 +168,6 @@ También se pueden usar otros modelos no-gratuitos o ilimitados modificando en a
 ```
 - En PowerShell7: cambia el alias en tu `$PROFILE`.
 - En Bash: cambia el nombre de la función `function aishell2()`.
-```
 
 
             PARA EL NOMBRE DEL ARCHIVO:
@@ -176,7 +175,6 @@ También se pueden usar otros modelos no-gratuitos o ilimitados modificando en a
             
 ```
 - Deberas modificar también tu ~/.bashrc y tu notepad $PROFILE para corregir con el nuevo path.
-```
 
   
 **Importante:**
@@ -187,7 +185,6 @@ También se pueden usar otros modelos no-gratuitos o ilimitados modificando en a
 ```
 * Revisa también `aishell2.ps1` para sustituir las alusiones del nombre de comando o de archivo.
 
-```
 ---
 
 # 🏁 Final
