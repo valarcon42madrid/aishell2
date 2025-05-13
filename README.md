@@ -44,7 +44,7 @@ Las instrucciones de la IA están coloreadas según su contexto:
 
 Ejemplo:
 
-
+![Salida de ejemplo con colores](EjemploAISHELL2.png)
 
 ---
 
