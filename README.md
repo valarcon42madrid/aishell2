@@ -43,7 +43,6 @@ Las instrucciones de la IA están coloreadas según su contexto:
 💛 Explicaciones y notas se muestran en amarillo.
 
 Ejemplo:
-
 ![Salida de ejemplo con colores](EjemploAISHELL2.png)
 
 ---
