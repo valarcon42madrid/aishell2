@@ -256,8 +256,16 @@ $currentDirectory = (Get-Location).Path
 Write-Host "CONTEXTO ADICIONAL (puedes copiar y pegar errores, fragmentos de archivos, etc):" -ForegroundColor Yellow
 $userInput = Read-Host
 
+# Aclaracíon de errores
+$ACLARACION = ""
+
+if ($e) {
+    $ACLARACION = "`nACLARACIÓN SOBRE ERRORES A IGNORAR: Si los errores están relacionados con parámetros no válidos por expresiones parecidas a '-e', '-f', '-d', '-full', o de 'pN,bN', 'pN' o 'bN' siendo N un número, e incluyen el término aishell2.ps1 corresponderán al propio uso de la llamada mediante la que se está pidiendo ayuda, y NUNCA deberán tenerse en cuenta."
+}
+
 # Preparar prompt
-$prompt = "Historial combinado:`n$combinedHistory`n$fileContent`n$directoryContent`n$errorContent`n`nContexto adicional:`n$userInput`n`nNOTA: El comando 'aishell2' fue ejecutado desde el directorio: '$currentDirectory'."
+$prompt = "Historial combinado:`n$combinedHistory`n$fileContent`n$directoryContent`n$errorContent$ACLARACION`n`nContexto adicional:`n$userInput`n`nNOTA: El comando 'aishell2' fue ejecutado desde el directorio: '$currentDirectory'."
+
 
 # Consultar IA
 $response = Ask-Groq -Prompt $prompt -Groq_API_Key $Groq_API_Key
