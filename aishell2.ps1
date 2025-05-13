@@ -260,7 +260,7 @@ $userInput = Read-Host
 $ACLARACION = ""
 
 if ($e) {
-    $ACLARACION = "`nACLARACIÓN SOBRE ERRORES A IGNORAR: Si los errores están relacionados con parámetros no válidos e incluyen exactamente el término 'aishell2.ps1' corresponderán al propio uso de la llamada mediante la que se está pidiendo ayuda, y NUNCA deberán tenerse en cuenta."
+    $ACLARACION = "`nACLARACIÓN SOBRE ERRORES A IGNORAR: Si los errores incluyen exactamente el término aishell2 o aishell2.ps1 corresponderán a la llamada mediante la que se está pidiendo tu ayuda, y DEBERÁN SER COMPLETAMENTE IGNORADOS."
 }
 
 # Preparar prompt
