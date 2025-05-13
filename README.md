@@ -4,14 +4,19 @@
 
 # 🚀 ¿Qué es `aishell2`?
 
-**aishell2** es un comando personalizable que permite enviar historial de terminal, archivos relevantes, errores recientes y contexto manual a un modelo de lenguaje (LLM) alojado en **Groq**.
+aishell2 es un comando personalizable que permite enviar historial de terminal, archivos relevantes, errores recientes y contexto manual a un modelo de lenguaje (LLM) alojado en Groq.
 
 Puede ayudarte a:
 
-- Diagnosticar errores.
-- Sugerir correcciones de comandos.
-- Interpretar archivos como `Dockerfile`, `docker-compose.yml`, `.env`, `.json`, etc.
-- Recibir instrucciones prácticas directamente coloreadas para ejecución rápida.
+Diagnosticar errores en terminales Bash/PowerShell.
+
+Sugerir correcciones de comandos.
+
+Interpretar archivos como Dockerfile, docker-compose.yml, .env, .json, .yml, etc.
+
+Recibir instrucciones prácticas y coloreadas para ejecución directa en tu terminal.
+
+
 
 ## Modos de Uso
 
@@ -19,10 +24,28 @@ Puede ayudarte a:
 |:--|:--|
 | `-f archivo1,archivo2` | Incluye uno o varios archivos en el contexto enviado. |
 | `-d directorio` | Incluye todos los archivos especiales (.yml, .json, Dockerfile, etc.) de un directorio. |
-| `-e` | Añade errores recientes detectados en PowerShell o Bash/WSL. |
+| -p N	| Añade los últimos N comandos de PowerShell al contexto. |
+| -b N	| Añade los últimos N comandos de Bash al contexto. |
+| -e pN,bM	| Añade errores recientes: pN para PowerShell y bM para Bash. Ej: -e p3,b5. |
 | `-full` | Envía archivos completos, ignorando el límite de 500 líneas o 32 KB. |
-| `-simple` | No incluye historiales ni errores; solo archivos y texto manual. |
 | `-h` | Muestra la ayuda de uso rápida. |
+
+---
+
+## 🎨 Comandos coloreados
+
+Las instrucciones de la IA están coloreadas según su contexto:
+
+💜 Bash: líneas que comienzan con Bash: $> se muestran en magenta.
+
+💙 PowerShell: líneas que comienzan con Powershell: $> se muestran en cyan.
+
+💛 Explicaciones y notas se muestran en amarillo.
+
+Ejemplo:
+
+$> ip addr show        ← magenta (Bash)
+$> Get-NetIPAddress    ← cyan (PowerShell)
 
 ---
 
@@ -35,7 +58,7 @@ Cuando usas `aishell2`, **los datos (historiales, archivos, errores y contexto a
 
 - **No uses `aishell2` en entornos profesionales/confidenciales** sin aprobación.
 - **Nunca envíes información sensible, contraseñas, secretos, archivos confidenciales**.
-- Considera usar `-simple` y redactar tu consulta manualmente si el entorno es delicado.
+ - Considera redactar manualmente el contexto y limitar el uso de flags -p, -b o -e si el entorno es delicado.
 
 ✅ Recuerda: aunque Groq tiene políticas de privacidad, **al usar un LLM público, los datos salen de tu máquina**.
 
