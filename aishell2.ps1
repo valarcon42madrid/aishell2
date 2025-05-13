@@ -125,7 +125,7 @@ try {
     $Groq_API_Key = Get-GroqApiKey
 } catch {
     Write-Host $_.Exception.Message -ForegroundColor Red
-    exit
+    exit 2
 }
 
 # Historiales
@@ -181,7 +181,7 @@ if ($e) {
                 $bashErrorCount = [int]$Matches[1]
             } else {
                 Write-Host "Error: Formato inválido en -e. Usa pN para PowerShell o bN para Bash (ej: -e p3,b5)." -ForegroundColor Red
-                exit
+                exit 1
             }
         }
     }
