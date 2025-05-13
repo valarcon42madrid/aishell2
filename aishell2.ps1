@@ -1,13 +1,12 @@
-# aishell2.ps1
-
 [CmdletBinding()]
 param(
     [string[]]$f,
     [string]$d,
     [switch]$full,
-    [switch]$e,
+    [string[]]$e,
     [switch]$h,
-    [switch]$simple
+    [int]$p,
+    [int]$b
 )
 
 # Función para mostrar ayuda
@@ -16,16 +15,16 @@ function Show-Help {
 Uso de aishell2:
 
   -f archivo1 archivo2   Incluye uno o más archivos específicos en el contexto.
-  -d directorio          Incluye archivos especiales (.json, .yml, Dockerfile, etc) dentro del directorio indicado.
-  -full                  (Opcional) Leer archivos completos sin límite de líneas o peso.
-  -e                     (Opcional) Incluir errores recientes detectados en PowerShell y Bash/WSL.
-  -simple                (Opcional) No incluir historiales de terminales. Solo archivos, directorios y contexto manual.
-                         No puede combinarse con -e ni con -full.
+  -d directorio          Incluye archivos especiales (.json, .yml, Dockerfile, etc.) dentro del directorio indicado.
+  -full                  Leer archivos completos sin límite de líneas o peso.
+  -e bN,pN               Incluir errores recientes. Usa bN para Bash y pN para PowerShell (ej. -e b5,p3).
+  -p N                   Incluir los últimos N comandos de PowerShell.
+  -b N                   Incluir los últimos N comandos de Bash/WSL.
   -h                     Mostrar esta ayuda y salir.
 
 Notas:
-  - Se incluyen los últimos 40 comandos de PowerShell y Bash automáticamente (salvo en modo -simple).
-  - El contenido de archivos grandes puede ser truncado a 500 líneas o 32KB si no se usa -full.
+  - Si no usas -p ni -b, no se incluirá historial de comandos.
+  - El contenido de archivos grandes puede truncarse a 500 líneas o 32KB si no se usa -full.
   - El directorio actual se envía como parte del contexto para ayudar a la IA.
 "@ -ForegroundColor Cyan
 }
@@ -73,22 +72,6 @@ function Get-LimitedFileContent {
     }
 }
 
-# Funciones para obtener historiales
-function Get-RecentPSCommands {
-    (Get-History | Select-Object -Last 40 | ForEach-Object { $_.CommandLine }) -join "`n"
-}
-
-function Get-RecentBashCommands {
-    try {
-        wsl bash -c "history -a" | Out-Null
-        $bashHistoryRaw = wsl cat ~/.bash_history
-        $bashHistory = $bashHistoryRaw -split "`n"
-        return ($bashHistory | Select-Object -Last 40) -join "`n"
-    } catch {
-        return "[No se pudo leer el historial de Bash]"
-    }
-}
-
 # Función para enviar pregunta a Groq
 function Ask-Groq {
     param(
@@ -109,8 +92,8 @@ function Ask-Groq {
                 "content" = @"
 Eres un asistente de terminal llamado 'aishell2'. No eres un comando del sistema operativo ni ejecutas acciones directamente. 
 Tu única función es analizar historial, archivos proporcionados, errores detectados y contexto adicional para ofrecer soluciones técnicas claras y específicas.
-Cuando propongas comandos o instrucciones para Bash/WSL, precede cada línea de instrucción con "$BASH> ".
-Cuando propongas comandos o instrucciones para PowerShell, precede cada línea de instrucción con "$POWERSHELL> ".
+Cuando propongas comandos o instrucciones para Bash/WSL, precede cada línea de instrucción con "Bash: $> ".
+Cuando propongas comandos o instrucciones para PowerShell, precede cada línea de instrucción con "Powershell: $> ".
 El resto de tu respuesta debe ser explicaciones normales en texto plano.
 "@
             },
@@ -145,52 +128,90 @@ try {
     exit
 }
 
-# Validar combinaciones inválidas
-if ($simple -and ($e -or $full)) {
-    Write-Host "Error: La opción -simple no puede combinarse con -e ni con -full." -ForegroundColor Red
-    exit
+# Historiales
+$combinedHistory = ""
+
+if ($p) {
+    function Get-RecentPSCommands {
+        param($count)
+        (Get-History | Select-Object -Last $count | ForEach-Object { $_.CommandLine }) -join "`n"
+    }
+    $psHistory = Get-RecentPSCommands -count $p
+    $combinedHistory += "=== Historial de PowerShell (últimos $p) ===`n$psHistory`n"
 }
 
+if ($b) {
+    function Get-RecentBashCommands {
+        param($count)
+        try {
+            wsl bash -c "history -a" | Out-Null
+            $bashHistoryRaw = wsl cat ~/.bash_history
+            $bashHistory = $bashHistoryRaw -split "`n"
+            return ($bashHistory | Select-Object -Last $count) -join "`n"
+        } catch {
+            return "[No se pudo leer el historial de Bash]"
+        }
+    }
+    $bashHistory = Get-RecentBashCommands -count $b
+    $combinedHistory += "`n=== Historial de Bash (últimos $b) ===`n$bashHistory"
+}
+
+if (-not $p -and -not $b) {
+    $combinedHistory = "=== No se especificaron flags -p ni -b: no se ha incluido historial ==="
+}
+
+# Errores
 $errorContent = ""
 
-# Recoger historiales
-if ($simple) {
-    $combinedHistory = "=== Modo simple activado: No se ha incluido historial de terminales ==="
-} else {
-    $psHistory = Get-RecentPSCommands
-    $bashHistory = Get-RecentBashCommands
-    $combinedHistory = "=== Historial de PowerShell ===`n$psHistory`n`n=== Historial de Bash ===`n$bashHistory"
-    # Recoger errores
-    if ($e -and -not $simple) {
-        # Errores de PowerShell
-        if ($Error.Count -gt 0) {
-            $psErrors = ($Error[-5..-1] | ForEach-Object { $_.ToString() }) -join "`n"
-            $errorContent += "`n=== Errores recientes de PowerShell ===`n$psErrors"
-        }
+$includePSErrors = $false
+$includeBashErrors = $false
+$psErrorCount = 0
+$bashErrorCount = 0
 
-        # Errores en Bash/WSL
-        try {
-            $lastBashExitCode = (wsl bash -c "echo $?").Trim()
-            wsl bash -c "true" | Out-Null
-            $secondLastBashExitCode = (wsl bash -c "echo $?").Trim()
-
-            if ($lastBashExitCode -ne "0" -or $secondLastBashExitCode -ne "0") {
-                wsl bash -c "history -a" | Out-Null
-                $bashErrorHistoryRaw = wsl cat ~/.bash_history
-                $bashErrorHistory = $bashErrorHistoryRaw -split "`n"
-                $bashCommands = ($bashErrorHistory | Select-Object -Last 5) -join "`n"
-                $errorContent += "`n=== Comandos recientes en Bash tras errores ===`n$bashCommands"
+# Parsear los valores de -e
+if ($e) {
+    foreach ($item in $e) {
+        $splitItems = $item -split ','
+        foreach ($token in $splitItems) {
+            if ($token -match '^p(\d+)$') {
+                $includePSErrors = $true
+                $psErrorCount = [int]$Matches[1]
+            } elseif ($token -match '^b(\d+)$') {
+                $includeBashErrors = $true
+                $bashErrorCount = [int]$Matches[1]
+            } else {
+                Write-Host "Error: Formato inválido en -e. Usa pN para PowerShell o bN para Bash (ej: -e p3,b5)." -ForegroundColor Red
+                exit
             }
-        } catch {
-            $errorContent += "`n(No se pudo determinar el estado de errores en Bash)"
         }
     }
 }
 
+# Recoger errores de PowerShell
+if ($includePSErrors -and $psErrorCount -gt 0) {
+    if ($Error.Count -gt 0) {
+        $psErrors = ($Error | Select-Object -Last $psErrorCount | ForEach-Object { $_.ToString() }) -join "`n"
+        $errorContent += "`n=== Últimos $psErrorCount errores de PowerShell ===`n$psErrors"
+    } else {
+        $errorContent += "`n=== No hay errores recientes de PowerShell registrados ==="
+    }
+}
+
+# Recoger errores de Bash
+if ($includeBashErrors -and $bashErrorCount -gt 0) {
+    try {
+        wsl bash -c "history -a" | Out-Null
+        $bashErrorHistoryRaw = wsl cat ~/.bash_history
+        $bashErrorHistory = $bashErrorHistoryRaw -split "`n"
+        $bashCommands = ($bashErrorHistory | Select-Object -Last $bashErrorCount) -join "`n"
+        $errorContent += "`n=== Últimos $bashErrorCount comandos en Bash tras errores ===`n$bashCommands"
+    } catch {
+        $errorContent += "`n(No se pudo determinar el estado de errores en Bash)"
+    }
+}
 
 # Archivos/directorios
 $fileContent = ""
-
 if ($f) {
     foreach ($fileItem in $f) {
         $resolvedFile = Resolve-Path -Path $fileItem -ErrorAction SilentlyContinue
@@ -242,10 +263,14 @@ $prompt = "Historial combinado:`n$combinedHistory`n$fileContent`n$directoryConte
 $response = Ask-Groq -Prompt $prompt -Groq_API_Key $Groq_API_Key
 
 if ($response) {
-    Write-Host "`nRespuesta de AI Shell (comandos en rosa brillante, texto explicativo en amarillo):" -ForegroundColor Green
-    $response -split "`n" | ForEach-Object {
-        if ($_ -match "^\s*\$BASH>|^\s*\$POWERSHELL>") {
-            Write-Host $_ -ForegroundColor Magenta
+    Write-Host "`nRespuesta de AI Shell (comandos en colores, texto explicativo en amarillo):" -ForegroundColor Green
+        $response -split "`n" | ForEach-Object {
+        if ($_ -match "^\s*Bash:\s*\$\>\s*(.+)$") {
+            $command = $Matches[1]
+            Write-Host "$> $command" -ForegroundColor Magenta
+        } elseif ($_ -match "^\s*Powershell:\s*\$\>\s*(.+)$") {
+            $command = $Matches[1]
+            Write-Host "$> $command" -ForegroundColor Cyan
         } else {
             Write-Host $_ -ForegroundColor Yellow
         }
@@ -253,5 +278,3 @@ if ($response) {
 } else {
     Write-Host "No se recibió respuesta de la IA." -ForegroundColor DarkRed
 }
-
-
