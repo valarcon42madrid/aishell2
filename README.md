@@ -93,6 +93,7 @@ notepad $PROFILE
 ```powershell
 Set-Alias aishell2 "C:\Users\<YOURUSERNAME>\grokAIshell\aishell2.ps1"
 ```
+**¡Esto es suponiendo que ubiques aishell2.ps1 en C:\Users\TU_USUARIO\grokAIshell\!**
 
 ✅ Ahora podrás usar `aishell2` directamente en PowerShell7.
 
@@ -184,5 +185,7 @@ PARA EL NOMBRE DEL ARCHIVO:
 # 🏁 Final
 
 ✨ Disfruta de tu `aishell2` — diseñado para ser potente, profesional y adaptado tanto a Bash como a PowerShell7.
+
+Puedes encontrar una implementación similar pero en local (sin internet) en https://github.com/valarcon42madrid/aishell
 
 ---
